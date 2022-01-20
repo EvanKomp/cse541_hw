@@ -190,8 +190,8 @@ def run_agent(agent):
     return agent
 
 # Problem 4.1
-T = 2000
-mus = [.9]
+T = 150000
+mus = [.1]
 for i in range(9):
     mus.append(0)
 
@@ -225,20 +225,8 @@ df = pd.DataFrame({
 
 df.to_csv('p4.1.csv')
 
-fig, ax = plt.subplots()
-
-ax.plot(t, r_ucb, c='tab:red', label='ucb')
-ax.plot(t, r_etc1, c='tab:blue', label=f'etc, m={etc1.m}', alpha = .4)
-ax.plot(t, r_etc2, c='tab:blue', label=f'etc, m={etc2.m}', alpha = .6)
-ax.plot(t, r_etc3, c='tab:blue', label=f'etc, m={etc3.m}')
-ax.plot(t, r_gt, c='tab:green', label=f'thompson')
-ax.set_xlabel('timestep')
-ax.set_ylabel('regret')
-plt.legend()
-plt.savefig('p4.1.png', bbox_inches='tight', dpi=600)
-
 # Problem 4.2
-T = 20000
+T = 150000
 mus = [1]
 for i in range(2,41):
     mus.append(1-1/np.sqrt(i-1))
@@ -273,14 +261,4 @@ df = pd.DataFrame({
 
 df.to_csv('p4.2.csv')
 
-fig, ax = plt.subplots()
 
-ax.plot(t, r_ucb, c='tab:red', label='ucb')
-ax.plot(t, r_etc1, c='tab:blue', label=f'etc, m={etc1.m}', alpha = .4)
-ax.plot(t, r_etc2, c='tab:blue', label=f'etc, m={etc2.m}', alpha = .6)
-ax.plot(t, r_etc3, c='tab:blue', label=f'etc, m={etc3.m}')
-ax.plot(t, r_gt, c='tab:green', label=f'thompson')
-ax.set_xlabel('timestep')
-ax.set_ylabel('regret')
-plt.legend()
-plt.savefig('p4.2.png', bbox_inches='tight', dpi=600)
