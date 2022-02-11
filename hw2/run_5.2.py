@@ -1,5 +1,11 @@
 import utils as ut
 import numpy as np
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+sns.set_style('whitegrid')
+sns.set_context('talk')
 
 n = np.array([10+2**i for i in range(1,11)])
 a = np.array([0.0, .5, 1.0, 2.0])
