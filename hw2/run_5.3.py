@@ -6,6 +6,8 @@ import pandas as pd
 sns.set_style('whitegrid')
 sns.set_context('talk')
 
+X = ut.X
+
 frank = ut.FrankWolfe(ut.Phi, 1000)
 lbda_frank, D = frank.run()
 
