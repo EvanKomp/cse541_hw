@@ -30,7 +30,7 @@ plt.savefig('5.3a.png', bbox_inches='tight', dpi=300)
 plt.close()
 
 fig, ax = plt.subplots()
-ax.plot(X, f_star, label ="True function", color='k', lw=3)
+ax.plot(X, ut.f_star, label ="True function", color='k', lw=3)
 ax.plot(X, f_unif_Phi, label ="Uniform sampling of kernel space", color='tab:red', lw=1, ls='--')
 ax.plot(X, f_G_Phi, label ="D optimal sampling of kernel space", color='tab:blue', lw=1, ls='--')
 
@@ -42,9 +42,9 @@ plt.savefig('5.3b.png', bbox_inches='tight', dpi=300)
 plt.close()
 
 fig, ax = plt.subplots(figsize=(15,10))
-ax.plot(X, np.abs(f_star - f_G_Phi), label="D optimal error", color='tab:red')
-ax.plot(X, np.abs(f_star - f_unif_Phi), label="Uniform error", color='tab:red', ls='-.')
-ax.plot(X, np.ones(X.shape)*np.sqrt(d/n), color='k', label="root(d/n)")
+ax.plot(X, np.abs(ut.f_star - f_G_Phi), label="D optimal error", color='tab:red')
+ax.plot(X, np.abs(ut.f_star - f_unif_Phi), label="Uniform error", color='tab:red', ls='-.')
+ax.plot(X, np.ones(X.shape)*np.sqrt(ut.d/ut.n), color='k', label="root(d/n)")
 ax.plot(X, conf_G, label="D optimal confidence", color='tab:blue')
 ax.plot(X, conf_unif, label="uniform confidence", color='tab:blue', ls='-.')
 
