@@ -307,8 +307,8 @@ class UCB(Agent):
     
     def update_states(self, arm_num, observation):
         xt = self.X[arm_num]
-        self.V = self.V + xt.reshape(-1,1) @ xt.reshape(1,-1)
-        self.S = self.S + xt.reshape(-1,1) * observation
+        self.V = self.V + (xt.reshape(-1,1) @ xt.reshape(1,-1))
+        self.S = self.S + (xt.reshape(-1,1) * observation)
         return
     
 class Thompson(Agent):
