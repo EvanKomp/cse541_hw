@@ -318,8 +318,8 @@ class Thompson(Agent):
     
     def step(self):
         mu = (np.linalg.inv(self.V) @ self.S).reshape(-1)
-        scale = np.sqrt(np.diag(np.linalg.inv(self.V))).reshape(-1)
-        posterior = scipy.stats.norm(loc=mu, scale=scale)
+        cov = np.linalg.inv(self.V)
+        posterior = scipy.stats.multivariate_normal(mean=mu, cov=cov)
         theta = posterior.rvs()
         It = np.argmax(self.X @ theta.reshape(-1,1))
         self.pull(It)
