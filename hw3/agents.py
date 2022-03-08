@@ -4,29 +4,6 @@ import sklearn.linear_model
 class Agent:
     
     def __init__(self, C, y, T, n=n, gamma=1.0, log_rate=10):
-        """
-        Parameters
-        ----------
-        C - array of shape (number of contexts, context dim)
-            Contexts to randomly select from each timestep
-        y - true class vector of ints len number of contexts
-        T - Max time steps
-        n - int number of actions possible
-        gamma - regularization strength
-        log_rate - number of timesteps between logging regret
-        
-        
-        Attributes
-        ----------
-        V - covariance matrix
-        V_inv - inverse covaraince matrix, tracked to avoid invesion steps
-        S - reward matrix
-        R - current regret
-        R_log - logged regret results
-        d - context size
-        phi_d - action space size, d * n
-        """
-        
         self.C = C
         self.y = y
         self.T = T
@@ -117,10 +94,6 @@ class Agent:
         raise NotImplemented()
         
     def update(self, ind, a, r):
-        """Update the variance and reward matrices
-        
-        Morrison Sherman used to track inverse so that inversion steps do not have to be run
-        """
         phis = self.phi(ind,a).reshape((-1,1))
         self.S += r * phis
         self.V += phis @ (phis.T)
@@ -197,7 +170,7 @@ class UCB(Agent):
         return
     
     def pick(self, ind):
-        # print(f'Context {ind} revealed')
+        print(f'Context {ind} revealed')
         beta = np.sqrt(self.gamma) + np.sqrt(2*np.log(1/self.del_)+np.log(np.linalg.det(self.V)/np.linalg.det(self.V0)))
         theta = self.theta
         phis = np.array([self.phi(ind, a) for a in range(self.n)])
@@ -206,10 +179,10 @@ class UCB(Agent):
         for phi in phis:
             bound.append(beta * np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
         bound = np.array(bound).reshape(-1,1) 
-        # print('Beta: ', beta)
-        # print('Predicted reward:confidence')
+        print('Beta: ', beta)
+        print('Predicted reward:confidence')
         print(np.concatenate([r_hats, bound], axis=1))
         a = randargmax(r_hats + bound)
-        # print(f'Chose arm {a}')
+        print(f'Chose arm {a}')
         return a
     
