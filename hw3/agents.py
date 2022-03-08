@@ -1,9 +1,12 @@
 import numpy as np
 import sklearn.linear_model
 
+def randargmax(b,**kw):
+    return np.argmax(np.random.random(b.shape) * (b==b.max()), **kw)
+
 class Agent:
     
-    def __init__(self, C, y, T, n=n, gamma=1.0, log_rate=10):
+    def __init__(self, C, y, T, n=10, gamma=1.0, log_rate=10):
         self.C = C
         self.y = y
         self.T = T
@@ -103,7 +106,7 @@ class Agent:
         
 class ETC_world(Agent):
     
-    def __init__(self, C, y, T, tau, n=n, log_rate=10):
+    def __init__(self, C, y, T, tau, n=10, log_rate=10):
         self.tau = tau
         super().__init__(C, y, T, n=n, log_rate=log_rate)
         return
@@ -126,7 +129,7 @@ class ETC_world(Agent):
     
 class ETC_bias(Agent):
     
-    def __init__(self, C, y, T, tau, n=n, log_rate=10):
+    def __init__(self, C, y, T, tau, n=10, log_rate=10):
         self.tau = tau
         super().__init__(C, y, T, n=n, log_rate=log_rate)
         return
