@@ -3,23 +3,44 @@ import agents
 import sklearn.decomposition
 import numpy as np
 import matplotlib.pyplot as plt
-T, d, gamma = sys.argv[1:]
-T=int(T); gamma=float(gamma); d=int(d)
-sys.stdout = open(f'./outs/T{T}_d{d}_gamma{gamma}.out', 'w')
+import itertools
+from joblib import Parallel, delayed
 
-C = np.load('C.npy')
-y = np.load('y.npy')
 
-pca = sklearn.decomposition.PCA(d)
-C = pca.fit_transform(C)
-scaler = sklearn.preprocessing.Normalizer()
-C = scaler.fit_transform(C)
 
-ucb = agents.UCB(C, y, T, gamma=gamma)
-ucb.run()
+def run(T,d,gamma):
 
-fig, ax = plt.subplots()
-ax.plot(*np.array(ucb.R_log).T)
-plt.savefig(f'./figs/T{T}_d{d}_gamma{gamma}.png', bbox_inches='tight')
+    sys.stdout = open(f'./outs/T{T}_d{d}_gamma{gamma}.out', 'w')
 
-sys.stdout.close()
+    C = np.load('C.npy')
+    y = np.load('y.npy')
+    
+    if d is not None:
+        pca = sklearn.decomposition.PCA(d)
+        C = pca.fit_transform(C)
+    scaler = sklearn.preprocessing.Normalizer()
+    C = scaler.fit_transform(C)
+
+    ucb = agents.UCB(C, y, T, gamma=gamma)
+    ucb.run()
+
+    fig, ax = plt.subplots()
+    ax.plot(*np.array(ucb.R_log).T)
+    plt.savefig(f'./figs/T{T}_d{d}_gamma{gamma}.png', bbox_inches='tight')
+
+    sys.stdout.close()
+
+
+def run_combos():
+    gammas = [.1,.5,.9,1.0,1.1,2,10]
+    ds = [10, 50, 200, 700, None]
+    Ts = [5000]
+    perms = itertools.product(Ts, ds, gammas)
+    Parallel(n_jobs=10)(delayed(run)(*i) for i in perms)
+    return
+
+if __name__ == '__main__':
+    run_combos()
+    
+    
+

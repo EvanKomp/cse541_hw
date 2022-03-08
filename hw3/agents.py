@@ -169,12 +169,16 @@ class UCB(Agent):
     
     def startup(self):
         self.del_ = 1/self.T
-        self.V0 = np.array(self.V)
+        self.det_V0 = np.linalg.det(self.V)
         return
+    
+    @property
+    def beta(self):
+        return (np.sqrt(self.gamma) + np.sqrt(2*np.log(1/self.del_)+np.log(np.linalg.det(self.V)/self.det_V0)))**2
     
     def pick(self, ind):
         print(f'Context {ind} revealed')
-        beta = np.sqrt(self.gamma) + np.sqrt(2*np.log(1/self.del_)+np.log(np.linalg.det(self.V)/np.linalg.det(self.V0)))
+        beta = self.beta
         theta = self.theta
         phis = np.array([self.phi(ind, a) for a in range(self.n)])
         r_hats = phis @ theta
