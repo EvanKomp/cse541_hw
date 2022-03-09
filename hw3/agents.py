@@ -1,6 +1,8 @@
 import numpy as np
 import sklearn.linear_model
 
+n=10
+
 def randargmax(b,**kw):
     return np.argmax(np.random.random(b.shape) * (b==b.max()), **kw)
 

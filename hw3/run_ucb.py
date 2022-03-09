@@ -21,7 +21,7 @@ def run(T,d,gamma):
     scaler = sklearn.preprocessing.Normalizer()
     C = scaler.fit_transform(C)
 
-    ucb = agents.UCB(C, y, T, gamma=gamma)
+    ucb = agents.UCB(C, y, T, gamma=gamma, beta_type='det', max_bound=True)
     ucb.run()
 
     fig, ax = plt.subplots()
