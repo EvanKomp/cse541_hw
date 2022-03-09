@@ -6,7 +6,7 @@ def randargmax(b,**kw):
 
 class Agent:
     
-    def __init__(self, C, y, T, n=10, gamma=1.0, log_rate=10):
+    def __init__(self, C, y, T, n=n, gamma=1.0, log_rate=10):
         self.C = C
         self.y = y
         self.T = T
@@ -21,7 +21,11 @@ class Agent:
         
         self.V = np.eye(self.phi_d) * gamma
         self.V_inv = np.linalg.inv(self.V)
+        self.log_det_V0 = self.phi_d*np.log(self.gamma)
+        self.log_det_V = self.phi_d*np.log(self.gamma)
         self.S = np.zeros((self.phi_d,1))
+        
+        self.L = max(np.linalg.norm(C, axis=1))
         
         self.startup()
         return
@@ -100,6 +104,7 @@ class Agent:
         phis = self.phi(ind,a).reshape((-1,1))
         self.S += r * phis
         self.V += phis @ (phis.T)
+        self.log_det_V = self.log_det_V + np.log(1 + phis.T @ self.V_inv @ phis)
         self.V_inv = self.V_inv - (self.V_inv @ phis @ phis.T @ self.V_inv)/(1 + phis.T @ self.V_inv @ phis)
         return
             
@@ -167,31 +172,35 @@ class FTL(ETC_world):
 
 class UCB(Agent):
     
-    def __init__(self, C, y, T, variable_beta=False, n=n, gamma=1.0, log_rate=10):
-        self.variable_beta = variable_beta
+    def __init__(self, C, y, T, beta_type='const', max_bound=False, n=n, gamma=1.0, log_rate=10):
+        self.max_bound = max_bound
+        self.beta_type = beta_type
         super().__init__(C, y, T, n=n, log_rate=log_rate, gamma=gamma)
         return
     
     
     def startup(self):
         self.del_ = 1/self.T
-        self.det_V0 = np.linalg.det(self.V)
-        print("Det V0 ", self.det_V0)
         return
     
     @property
     def beta(self):
-        if self.variable_beta:
+        if self.beta_type == 'det':
             return (
                 np.sqrt(self.gamma) + np.sqrt(
-                    2*np.log(1/self.del_) + np.log(np.linalg.det(self.V)/self.det_V0)
-                )
-            )**2
-        else:
+                    2*np.log(1/self.del_) + self.log_det_V - self.log_det_V0)
+                )**2
+        elif self.beta_type == 'const':
             return (
                 np.sqrt(self.gamma) + np.sqrt(
                     2*np.log(1/self.del_)
                 )
+            )**2
+        elif self.beta_type == 'L':
+            d = self.phi_d
+            return (
+                np.sqrt(self.gamma) + np.sqrt(
+                    2*np.log(1/self.del_) + d*np.log((d*self.gamma + self.T*self.L**2)/(d*self.L)))
             )**2
     
     def pick(self, ind):
@@ -204,6 +213,8 @@ class UCB(Agent):
         for phi in phis:
             bound.append(np.sqrt(beta) * np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
         bound = np.array(bound).reshape(-1,1) 
+        if self.max_bound:
+            bound = bound/max(bound)
         print('det V: ', np.linalg.det(self.V))
         print('Beta: ', beta)
         print('Predicted reward:confidence')
