@@ -167,25 +167,44 @@ class FTL(ETC_world):
 
 class UCB(Agent):
     
+    def __init__(self, C, y, T, variable_beta=False, n=n, gamma=1.0, log_rate=10):
+        self.variable_beta = variable_beta
+        super().__init__(C, y, T, n=n, log_rate=log_rate, gamma=gamma)
+        return
+    
+    
     def startup(self):
         self.del_ = 1/self.T
         self.det_V0 = np.linalg.det(self.V)
+        print("Det V0 ", self.det_V0)
         return
     
     @property
     def beta(self):
-        return (np.sqrt(self.gamma) + np.sqrt(2*np.log(1/self.del_)+np.log(np.linalg.det(self.V)/self.det_V0)))**2
+        if self.variable_beta:
+            return (
+                np.sqrt(self.gamma) + np.sqrt(
+                    2*np.log(1/self.del_) + np.log(np.linalg.det(self.V)/self.det_V0)
+                )
+            )**2
+        else:
+            return (
+                np.sqrt(self.gamma) + np.sqrt(
+                    2*np.log(1/self.del_)
+                )
+            )**2
     
     def pick(self, ind):
-        print(f'Context {ind} revealed')
+        print(f'Context {ind} revealed with true label {self.y[ind]}')
         beta = self.beta
         theta = self.theta
         phis = np.array([self.phi(ind, a) for a in range(self.n)])
         r_hats = phis @ theta
         bound = []
         for phi in phis:
-            bound.append(beta * np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
+            bound.append(np.sqrt(beta) * np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
         bound = np.array(bound).reshape(-1,1) 
+        print('det V: ', np.linalg.det(self.V))
         print('Beta: ', beta)
         print('Predicted reward:confidence')
         print(np.concatenate([r_hats, bound], axis=1))

@@ -29,12 +29,13 @@ def run(T,d,gamma):
     plt.savefig(f'./figs/T{T}_d{d}_gamma{gamma}.png', bbox_inches='tight')
 
     sys.stdout.close()
+    return
 
 
 def run_combos():
     gammas = [.1,.5,.9,1.0,1.1,2,10]
     ds = [10, 50, 200, 700, None]
-    Ts = [5000]
+    Ts = [10000]
     perms = itertools.product(Ts, ds, gammas)
     Parallel(n_jobs=10)(delayed(run)(*i) for i in perms)
     return
