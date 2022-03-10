@@ -8,25 +8,17 @@ import agents
 
 n_replicates = 3
 n_jobs = sys.argv[1]
-d = sys.argv[2]
 
 kwargs = {
-    'ETC_world': {'tau': 4000},
-    'ETC_bias': {'tau': 4000},
-    'FTL': {'tau': 4000},
+    'ETC_world': {'tau': 6422},
+    'ETC_bias': {'tau': 6422},
+    'FTL': {'tau': 6422},
     'UCB': dict(gamma = 2, beta_type='det', max_bound=False),
     'Thomp': {}
 }
 
 C = np.load('C.npy')
 y = np.load('y.npy')
-
-C = C/256
-
-if d is not None:
-    pca = sklearn.decomposition.PCA(d)
-    C = pca.fit_transform(C)
-C = C / np.linalg.norm(C, axis=1).reshape(-1,1)
 
 def test_agent_in_replicate(agent_class, kwargs):
     R_logs = []
