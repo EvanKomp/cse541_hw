@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.linear_model
+import scipy.stats
 
 n=10
 
@@ -76,25 +77,23 @@ class Agent:
         """
         r = self.r(ind, a)
         self.R += 1.0 - r
-        if r != 1:
-            print('!!!regret incurred!!!')
+        
+        self.t += 1
+        if self.t % self.log_rate == 0:
+            self.R_log.append((self.t, self.R))
             
         self.update(ind, a, r)
         # print(f'Pulled arm {a} for context {ind} and recieved reward {r}.')
-        if self.t % self.log_rate == 0:
-            self.R_log.append((self.t, self.R))
-        self.t += 1
         return r
     
     def run(self):
         """Run the algorithm until T."""
-        regret = []
+        
         while self.t < self.T:
-            ind_t = self.t
+            ind_t = np.random.choice(len(self.y))
             at = self.pick(ind_t)
-            r = self.pull(ind_t, at)
-            regret.append(1-r)
-        return regret
+            self.pull(ind_t, at)
+        return
     
     def pick(self, ind):
         """Pick arm based on context vector
@@ -111,7 +110,6 @@ class Agent:
         self.log_det_V = self.log_det_V + np.log(1 + phis.T @ self.V_inv @ phis)
         self.V_inv = self.V_inv - (self.V_inv @ phis @ phis.T @ self.V_inv)/(1 + phis.T @ self.V_inv @ phis)
         return
-            
             
         
 class ETC_world(Agent):
@@ -219,10 +217,10 @@ class UCB(Agent):
         r_hats = phis @ theta
         elip = []
         for phi in phis:
-            elip.append(np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
+            elip.append(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1))
         elip = np.array(elip).reshape(-1,1)
         self.elip_log.append(elip)
-        bound = np.sqrt(beta) * elip
+        bound = beta * elip
         if self.max_bound:
             bound = bound/max(bound)
             
@@ -233,4 +231,17 @@ class UCB(Agent):
         a = randargmax(r_hats + bound)
         print(f'Chose arm {a}')
         return a
+
+class Thompson(Agent):
     
+    def startup(self):
+        return
+    
+    def pick(self, ind):
+        theta = self.theta
+        V_inv = self.V_inv
+        theta_sample = scipy.stats.multivariate_normal(mean=theta.reshape(-1), cov=V_inv).rvs().reshape(-1,1)
+        phis = np.array([self.phi(ind, a) for a in range(self.n)])
+        r_hats = phis @ theta
+        a = np.argmax(r_hats)
+        return a
