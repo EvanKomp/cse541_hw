@@ -48,4 +48,4 @@ if __name__ == '__main__':
         maxed = True
 
     # do a test for maxing out
-    test_agent_in_replicate(UCB_maxed, dict(gamma = 2, beta_type='det', max_bound=True)
+    test_agent_in_replicate(UCB_maxed, dict(gamma = 2, beta_type='det', max_bound=True))
