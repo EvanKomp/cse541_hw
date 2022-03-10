@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 import agents
 
 n_replicates = 3
-n_jobs = sys.argv[1]
+n_jobs = int(sys.argv[1])
 
 kwargs = {
     'ETC_world': {'tau': 6422},
