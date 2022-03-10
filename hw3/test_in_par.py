@@ -14,7 +14,7 @@ kwargs = {
     'ETC_bias': {'tau': 6422},
     'FTL': {'tau': 6422},
     'UCB': dict(gamma = 2, beta_type='det', max_bound=False),
-    'Thomp': {}
+    'Thompson': {}
 }
 
 C = np.load('C.npy')
