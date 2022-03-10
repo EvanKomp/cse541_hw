@@ -15,13 +15,14 @@ def run(T,d,gamma):
     C = np.load('C.npy')
     y = np.load('y.npy')
     
+    C = C/256
+    
     if d is not None:
         pca = sklearn.decomposition.PCA(d)
         C = pca.fit_transform(C)
-    scaler = sklearn.preprocessing.Normalizer()
-    C = scaler.fit_transform(C)
+    C = C / np.linalg.norm(C, axis=1).reshape(-1,1)
 
-    ucb = agents.UCB(C, y, T, gamma=gamma, beta_type='det', max_bound=True)
+    ucb = agents.UCB(C, y, T, gamma=gamma, beta_type='det', max_bound=False)
     ucb.run()
 
     fig, ax = plt.subplots()

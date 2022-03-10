@@ -76,23 +76,25 @@ class Agent:
         """
         r = self.r(ind, a)
         self.R += 1.0 - r
-        
-        self.t += 1
-        if self.t % self.log_rate == 0:
-            self.R_log.append((self.t, self.R))
+        if r != 1:
+            print('!!!regret incurred!!!')
             
         self.update(ind, a, r)
         # print(f'Pulled arm {a} for context {ind} and recieved reward {r}.')
+        if self.t % self.log_rate == 0:
+            self.R_log.append((self.t, self.R))
+        self.t += 1
         return r
     
     def run(self):
         """Run the algorithm until T."""
-        
+        regret = []
         while self.t < self.T:
-            ind_t = np.random.choice(len(self.y))
+            ind_t = self.t
             at = self.pick(ind_t)
-            self.pull(ind_t, at)
-        return
+            r = self.pull(ind_t, at)
+            regret.append(1-r)
+        return regret
     
     def pick(self, ind):
         """Pick arm based on context vector
@@ -109,6 +111,7 @@ class Agent:
         self.log_det_V = self.log_det_V + np.log(1 + phis.T @ self.V_inv @ phis)
         self.V_inv = self.V_inv - (self.V_inv @ phis @ phis.T @ self.V_inv)/(1 + phis.T @ self.V_inv @ phis)
         return
+            
             
         
 class ETC_world(Agent):
@@ -177,6 +180,8 @@ class UCB(Agent):
     def __init__(self, C, y, T, beta_type='const', max_bound=False, n=n, gamma=1.0, log_rate=10):
         self.max_bound = max_bound
         self.beta_type = beta_type
+        self.beta_log = []
+        self.elip_log = []
         super().__init__(C, y, T, n=n, log_rate=log_rate, gamma=gamma)
         return
     
@@ -191,32 +196,36 @@ class UCB(Agent):
             return (
                 np.sqrt(self.gamma) + np.sqrt(
                     2*np.log(1/self.del_) + self.log_det_V - self.log_det_V0)
-                )**2
+                )
         elif self.beta_type == 'const':
             return (
                 np.sqrt(self.gamma) + np.sqrt(
                     2*np.log(1/self.del_)
                 )
-            )**2
+            )
         elif self.beta_type == 'L':
             d = self.phi_d
             return (
                 np.sqrt(self.gamma) + np.sqrt(
                     2*np.log(1/self.del_) + d*np.log((d*self.gamma + self.T*self.L**2)/(d*self.L)))
-            )**2
+            )
     
     def pick(self, ind):
         print(f'Context {ind} revealed with true label {self.y[ind]}')
         beta = self.beta
+        self.beta_log.append(beta)
         theta = self.theta
         phis = np.array([self.phi(ind, a) for a in range(self.n)])
         r_hats = phis @ theta
-        bound = []
+        elip = []
         for phi in phis:
-            bound.append(np.sqrt(beta) * np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
-        bound = np.array(bound).reshape(-1,1) 
+            elip.append(np.sqrt(phi.reshape(1,-1) @ self.V_inv @ phi.reshape(-1,1)))
+        elip = np.array(elip).reshape(-1,1)
+        self.elip_log.append(elip)
+        bound = np.sqrt(beta) * elip
         if self.max_bound:
             bound = bound/max(bound)
+            
         print('det V: ', np.linalg.det(self.V))
         print('Beta: ', beta)
         print('Predicted reward:confidence')
