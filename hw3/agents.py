@@ -12,6 +12,10 @@ class Agent:
     
     def __init__(self, C, y, T, n=n, gamma=1.0, log_rate=10):
         C, y =sklearn.utils.shuffle(C, y)
+        best_model = sklearn.linear_model.SGDClassifier()
+        best_model.fit(C, y)
+        y_best = best_model.predict(C)
+        self.y_best = y_best
         self.C = C
         self.y = y
         self.T = T
@@ -64,7 +68,7 @@ class Agent:
         ind : index of context raised
         a : index of action played
         """
-        return int(self.y[ind] == a)
+        return int(self.y_best[ind] == a)
     
     def pull(self, ind, a):
         """Commit an agent action. Updates regret.
