@@ -1,6 +1,7 @@
 import numpy as np
 import sklearn.linear_model
 import scipy.stats
+import sklearn.utils
 
 n=10
 
@@ -10,6 +11,7 @@ def randargmax(b,**kw):
 class Agent:
     
     def __init__(self, C, y, T, n=n, gamma=1.0, log_rate=10):
+        C, y =sklearn.utils.shuffle(C, y)
         self.C = C
         self.y = y
         self.T = T
